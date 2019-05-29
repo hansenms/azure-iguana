@@ -14,6 +14,6 @@ This information will need to passed to the deployment template.
 
 To deploy the template:
 
-<a href="https://transmogrify.azurewebsites.net/azuredeploy.json" target="_blank">
-    <img src="http://azuredeploy.net/deploybutton.png"/>
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fhansenms%2Fazure-iguana%2Fmaster%2Fazuredeploy.json" target="_blank">
+    <img src="https://azuredeploy.net/deploybutton.png"/>
 </a>
