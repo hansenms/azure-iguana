@@ -14,6 +14,17 @@ This information will need to passed to the deployment template.
 
 To deploy the template:
 
+```PowerShell
+# Create resource group
+$rg = New-AzureRmResourceGroup -Name "resource-group-name" -Location "westus2"
+
+# Deploy VM
+New-AzureRmResourceGroupDeployment -TemplateUri https://raw.githubusercontent.com/hansenms/azure-iguana/master/azuredeploy.json -vmName myiguanavmname -adminUsername 
+myadminuser -adminPassword $(ConvertTo-SecureString -AsPlainText -Force "adminuserpassword") -ResourceGroupName $rg.ResourceGroupName
+```
+
+Or use the portal:
+
 <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fhansenms%2Fazure-iguana%2Fmaster%2Fazuredeploy.json" target="_blank">
     <img src="https://azuredeploy.net/deploybutton.png"/>
 </a>
