@@ -1,4 +1,4 @@
-configuration ConfigureASEBuildAgentDsc
+configuration ConfigureIguanaDsc
 {
     param
     (
