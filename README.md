@@ -1,6 +1,6 @@
 # Automated deployment of InterfaceWare Iguana on Azure VM
 
-** THIS REPOSITORY IS IN DEVELOPMENT - CONFIGURATION NOT COMPLETE **
+**THIS REPOSITORY IS IN DEVELOPMENT - CONFIGURATION NOT COMPLETE**
 
 [iNTERFACEWARE Iguana](https://www.interfaceware.com/iguana.html) is a healthcare integration engine. This repository illustrates how to deploy a virtual machine (VM) to [Microsoft Azure](https://azure.microsoft.com) and install Iguana on this VM.
 
