@@ -1,0 +1,174 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmName": {
+            "type": "string"
+        },
+        "adminUsername": {
+            "type": "string"
+        },
+        "adminPassword": {
+            "type": "securestring"
+        },
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_D2_v2"
+        },
+        "imagePublisher": {
+            "type": "string",
+            "defaultValue": "MicrosoftWindowsServer"
+        },
+        "imageOffer": {
+            "type": "string",
+            "defaultValue": "WindowsServer"
+        },
+        "imageSku": {
+            "type": "string",
+            "defaultValue": "2016-Datacenter"
+        }
+    },
+    "variables": {
+        "nicName": "[concat(parameters('vmName'),'-nic')]",
+        "publicIpName": "[concat(variables('nicName'),'-ip')]",
+        "diagStorageAccountName": "[concat('vmdiag', uniqueString( resourceGroup().id, deployment().name ))]",
+        "diagStorageAccountId": "[resourceId('Microsoft.Storage/storageAccounts/', variables('diagStorageAccountName'))]",
+        "vnetName": "[concat(parameters('vmName'),'-vnet')]",
+        "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
+        "subnetId": "[concat(variables('vnetId'), '/subnets/default')]",
+        "IguanaConfigureModuleURL": "https://raw.githubusercontent.com/hansenms/azure-iguana/master/DSC/ConfigureIguana.ps1.zip",
+        "IguanaConfigureFunction": "ConfigureIguana.ps1\\ConfigureIguanaDsc"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[variables('diagStorageAccountName')]",
+            "apiVersion": "2016-01-01",
+            "location": "[resourceGroup().location]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "Storage",
+            "properties": {}
+        },
+        {
+            "name": "[variables('vnetName')]",
+            "type": "Microsoft.Network/virtualNetworks",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2016-03-30",
+            "dependsOn": [],
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/16"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties" : {
+                            "addressPrefix": "10.0.0.0/24"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('publicIpName')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2016-03-30",
+            "properties": {
+                "publicIPAllocationMethod": "Dynamic"
+            }
+        },
+        {
+            "name": "[variables('nicName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpName'))]"
+            ],
+            "apiVersion": "2016-03-30",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIpName'))]"
+                            },
+                            "subnet": {
+                                "id": "[variables('subnetId')]"
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "apiVersion": "2017-03-30",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('vmName')]",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]",
+                "[variables('diagStorageAccountId')]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[parameters('imagePublisher')]",
+                        "offer": "[parameters('imageOffer')]",
+                        "sku": "[parameters('imageSku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "FromImage"
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces',variables('nicName'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true,
+                        "storageUri": "[reference(variables('diagStorageAccountId'),'2016-01-01').primaryEndpoints.blob]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('vmName'), '/configureiguana')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', parameters('vmName'))]"
+            ],
+            "apiVersion": "2016-03-30",
+            "location": "[resourceGroup().location]",
+            "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.77",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "modulesURL": "[variables('IguanaConfigureModuleURL')]",
+                    "configurationFunction": "[variables('IguanaConfigureFunction')]",
+                }
+            }
+        }
+    ]
+}

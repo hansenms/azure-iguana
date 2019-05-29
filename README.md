@@ -11,3 +11,9 @@ The Iguana instance will be configured to make a connection to a specific instan
 1. Azure Active Directory client secret
 
 This information will need to passed to the deployment template.
+
+To deploy the template:
+
+<a href="https://transmogrify.azurewebsites.net/azuredeploy.json" target="_blank">
+    <img src="http://azuredeploy.net/deploybutton.png"/>
+</a>
