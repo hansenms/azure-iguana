@@ -19,8 +19,7 @@ To deploy the template:
 $rg = New-AzureRmResourceGroup -Name "resource-group-name" -Location "westus2"
 
 # Deploy VM
-New-AzureRmResourceGroupDeployment -TemplateUri https://raw.githubusercontent.com/hansenms/azure-iguana/master/azuredeploy.json -vmName myiguanavmname -adminUsername 
-myadminuser -adminPassword $(ConvertTo-SecureString -AsPlainText -Force "adminuserpassword") -ResourceGroupName $rg.ResourceGroupName
+New-AzureRmResourceGroupDeployment -TemplateUri https://raw.githubusercontent.com/hansenms/azure-iguana/master/azuredeploy.json -vmName myiguanavmname -adminUsername myadminuser -adminPassword $(ConvertTo-SecureString -AsPlainText -Force "adminuserpassword") -ResourceGroupName $rg.ResourceGroupName
 ```
 
 Or use the portal:
