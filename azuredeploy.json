@@ -26,6 +26,36 @@
         "imageSku": {
             "type": "string",
             "defaultValue": "2016-Datacenter"
+        },
+        "aadClientId": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure AD client id"
+            }
+        },
+        "aadClientSecret": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure AD client secret"
+            }
+        },
+        "aadAuthority": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure AD Authority"
+            }
+        },
+        "aadAudience": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure AD audience"
+            }
+        },
+        "fhirServerUrl": {
+            "type": "string",
+            "metadata": {
+                "description": "FHIR Server URL"
+            }
         }
     },
     "variables": {
@@ -37,7 +67,9 @@
         "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('vnetName'))]",
         "subnetId": "[concat(variables('vnetId'), '/subnets/default')]",
         "IguanaConfigureModuleURL": "https://raw.githubusercontent.com/hansenms/azure-iguana/master/DSC/ConfigureIguana.ps1.zip",
-        "IguanaConfigureFunction": "ConfigureIguana.ps1\\ConfigureIguanaDsc"
+        "IguanaConfigureFunction": "ConfigureIguana.ps1\\ConfigureIguanaDsc",
+        "aadTenant": "[last(split(parameters('aadAuthority'),'/'))]",
+        "aadAudience": "[if(empty(parameters('aadAudience')),parameters('fhirServerUrl'),parameters('aadAudience'))]"
     },
     "resources": [
         {
@@ -66,7 +98,7 @@
                 "subnets": [
                     {
                         "name": "default",
-                        "properties" : {
+                        "properties": {
                             "addressPrefix": "10.0.0.0/24"
                         }
                     }
@@ -167,6 +199,12 @@
                 "settings": {
                     "modulesURL": "[variables('IguanaConfigureModuleURL')]",
                     "configurationFunction": "[variables('IguanaConfigureFunction')]",
+                    "properties": {
+                        "clientId": "[parameters('aadClientId')]",
+                        "clientSecret": "[parameters('aadClientSecret')]",
+                        "tenantId": "[parameters('aadTenant')]",
+                        "fhirUrl": "[parameters('fhirServerUrl')]"
+                    }
                 }
             }
         }
