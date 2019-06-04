@@ -37,13 +37,13 @@ configuration ConfigureIguanaDsc
         
         File DownloadFolder {
             Type = 'Directory'
-            DestinationPath = $using:downloadFolder
+            DestinationPath = $downloadFolder
             Ensure = "Present"
         }
 
         File InstallFolder {
             Type = 'Directory'
-            DestinationPath = $using:downloadFolder
+            DestinationPath = $downloadFolder
             Ensure = "Present"
         }
 
@@ -53,6 +53,7 @@ configuration ConfigureIguanaDsc
                 return @{ 'Result' = $true }
             }
             SetScript = {
+                [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
                 Write-Host "Downloading Iguana: " + $using:downloadLink
                 Invoke-WebRequest -Uri $using:downloadLink -OutFile $using:path
             }
@@ -62,33 +63,33 @@ configuration ConfigureIguanaDsc
             DependsOn = "[File]DownloadFolder"
         }
 
-        Script UnzipIgunana
+        Archive UnzipIguana
+        {
+            Destination = $installDir
+            Path = $path
+            DependsOn = "[Script]DownloadIguana","[File]InstallFolder"
+        }
+
+        Script MoveFhirSource
         {
             GetScript = { 
                 return @{ 'Result' = $true }
             }
             SetScript = {
-                [IO.Compression.ZipFile]::ExtractToDirectory($using:path, $using:installDir)
+               Move-Item -Path $using:FHIRsrc -Destination $using:FHIRdir
             }
             TestScript = {
-                Test-Path $using:script
+                Test-Path $using:FHIRdir
             }
-            DependsOn = "[Script]DownloadIguana","[File]InstallFolder"
+            DependsOn = "[Archive]UnzipIguana"
         }
 
-        File MoveFhirSource {
-            SourcePath = $using:FHIRsrc
-            DestinationPath = $using:FHIRdir
-            Recurse = $true
-            Type = "Directory"
-            DependsOn = "[Script]UnzipIguana"
-        }
 
         File IguanaEnvFile {
-            DestinationPath = $using:IguanaEnv
+            DestinationPath = $IguanaEnv
             Type = "File"
-            Contents = 'clientId=' + ($using:clientId)+ "`r`n" + 'clientSecret=' + ($using:clientSecret)+ "`r`n" + 'tenantId=' +($using:tenantId)+ "`r`n" + 'fhirUrl=' + ($using:fhirUrl)
-            DependsOn = "[Script]UnzipIguana"
+            Contents = 'clientId=' + ($clientId)+ "`r`n" + 'clientSecret=' + ($clientSecret)+ "`r`n" + 'tenantId=' +($tenantId)+ "`r`n" + 'fhirUrl=' + ($fhirUrl)
+            DependsOn = "[Archive]UnzipIguana"
         }
 
         Script InstallStartProcess

@@ -202,7 +202,7 @@
                     "properties": {
                         "clientId": "[parameters('aadClientId')]",
                         "clientSecret": "[parameters('aadClientSecret')]",
-                        "tenantId": "[parameters('aadTenant')]",
+                        "tenantId": "[variables('aadTenant')]",
                         "fhirUrl": "[parameters('fhirServerUrl')]"
                     }
                 }
