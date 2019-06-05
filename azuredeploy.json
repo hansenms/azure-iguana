@@ -202,7 +202,8 @@
                     "properties": {
                         "clientId": "[parameters('aadClientId')]",
                         "clientSecret": "[parameters('aadClientSecret')]",
-                        "tenantId": "[variables('aadTenant')]",
+                        "authority": "[parameters('aadAuthority')]",
+                        "audience": "[variables('aadAudience')]",
                         "fhirUrl": "[parameters('fhirServerUrl')]"
                     }
                 }

@@ -9,8 +9,10 @@ configuration ConfigureIguanaDsc
         [String]$clientSecret,
 
         [Parameter(Mandatory=$true)]
-        [String]$tenantId,
+        [String]$authority,
 
+        [Parameter(Mandatory=$true)]
+        [String]$audience,
 
         [Parameter(Mandatory=$true)]
         [String]$fhirUrl,
@@ -22,6 +24,8 @@ configuration ConfigureIguanaDsc
     Import-DscResource -ModuleName 'PSDesiredStateConfiguration'
 
     #1. Declare Variables and create file path
+    $AZURE_TOKEN_ENDPOINT_V1= $authority + '/oauth2/token'
+    $AZURE_TOKEN_ENDPOINT_V2= $authority + '/oauth2/v2.0/token'
     $downloadFolder='C:\Downloads'
     $path = $downloadFolder + '\Iguana.zip'
     $installDir = 'C:\Program Files'
@@ -79,7 +83,7 @@ configuration ConfigureIguanaDsc
                Move-Item -Path $using:FHIRsrc -Destination $using:FHIRdir
             }
             TestScript = {
-                Test-Path $using:FHIRdir
+                Test-Path ($using:FHIRdir + 'FHIR')
             }
             DependsOn = "[Archive]UnzipIguana"
         }
@@ -88,7 +92,7 @@ configuration ConfigureIguanaDsc
         File IguanaEnvFile {
             DestinationPath = $IguanaEnv
             Type = "File"
-            Contents = 'clientId=' + ($clientId)+ "`r`n" + 'clientSecret=' + ($clientSecret)+ "`r`n" + 'tenantId=' +($tenantId)+ "`r`n" + 'fhirUrl=' + ($fhirUrl)
+            Contents = 'AZURE_RESOURCE=' + ($audience)+ "`r`n" + 'AZURE_SERVICE_ID=' + ($clientId)+ "`r`n" + 'AZURE_SERVICE_SECRET=' +($clientSecret)+ "`r`n" + 'AZURE_TOKEN_ENDPOINT_V1=' + ($AZURE_TOKEN_ENDPOINT_V1) + "`r`n" + 'AZURE_TOKEN_ENDPOINT_V2=' + ($AZURE_TOKEN_ENDPOINT_V2)
             DependsOn = "[Archive]UnzipIguana"
         }
 
