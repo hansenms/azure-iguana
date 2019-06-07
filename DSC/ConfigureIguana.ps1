@@ -92,7 +92,7 @@ configuration ConfigureIguanaDsc
         File IguanaEnvFile {
             DestinationPath = $IguanaEnv
             Type = "File"
-            Contents = 'AZURE_RESOURCE=' + ($audience)+ "`r`n" + 'AZURE_SERVICE_ID=' + ($clientId)+ "`r`n" + 'AZURE_SERVICE_SECRET=' +($clientSecret)+ "`r`n" + 'AZURE_TOKEN_ENDPOINT_V1=' + ($AZURE_TOKEN_ENDPOINT_V1) + "`r`n" + 'AZURE_TOKEN_ENDPOINT_V2=' + ($AZURE_TOKEN_ENDPOINT_V2)
+            Contents = 'AZURE_FHIR_URL=' + ($fhirUrl) + "`r`n" + 'AZURE_RESOURCE=' + ($audience)+ "`r`n" + 'AZURE_SERVICE_ID=' + ($clientId)+ "`r`n" + 'AZURE_SERVICE_SECRET=' +($clientSecret)+ "`r`n" + 'AZURE_TOKEN_ENDPOINT_V1=' + ($AZURE_TOKEN_ENDPOINT_V1) + "`r`n" + 'AZURE_TOKEN_ENDPOINT_V2=' + ($AZURE_TOKEN_ENDPOINT_V2)
             DependsOn = "[Archive]UnzipIguana"
         }
 
